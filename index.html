@@ -2,14 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Samstronger</title>
 <meta name="apple-mobile-web-app-title" content="Samstronger">
 <meta name="application-name" content="Samstronger">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1A1A1A">
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@500;600;700&display=swap">
@@ -393,7 +393,11 @@ svg.coach.tap .cbody{animation:chop .5s cubic-bezier(.3,1.4,.5,1)}
 .stage2 .fig,.wcoach .fig{cursor:pointer;border-radius:8px}
 .stage2 .bub,.wcoach .bub{position:relative}
 .stage2 .bub::before,.wcoach .bub::before{content:"";position:absolute;left:-9px;top:50%;width:13px;height:13px;margin-top:-7px;background:var(--white);border-left:2.5px solid var(--ink);border-bottom:2.5px solid var(--ink);transform:rotate(45deg)}
-html{touch-action:manipulation}
+html{touch-action:manipulation;background:#1A1A1A}
+[data-theme=dark]:root{background:#0E0C0B}
+body{padding-top:env(safe-area-inset-top);min-height:100vh;box-sizing:border-box}
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top);background:#1A1A1A;z-index:60}
+[data-theme=dark] body::before{background:#0E0C0B}
 *{touch-action:manipulation}
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 input,textarea,select{-webkit-user-select:text;user-select:text}
