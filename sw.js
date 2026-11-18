@@ -1,33 +1,15 @@
-// Samflyer service worker: keeps the app working offline.
-const CACHE = 'samflyer-v1.5';
-const SHELL = ['./', 'index.html', 'app.js', 'data.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
-self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
-});
-self.addEventListener('activate', (e) => {
-  e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
-});
-self.addEventListener('fetch', (e) => {
-  const req = e.request;
-  if (req.method !== 'GET') return;
-  const url = new URL(req.url);
-  // Map tiles: always from the network (too many to store).
-  if (url.hostname.endsWith('openfreemap.org') || url.hostname.endsWith('earthdata.nasa.gov')) return;
-  // App files: network first so updates arrive, cache as fallback for offline.
-  if (url.origin === location.origin) {
-    e.respondWith(fetch(req, { cache: 'no-cache' }).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((c) => c.put(req, copy));
-      return res;
-    }).catch(() => caches.match(req).then((r) => r || caches.match('index.html'))));
+// Samstronger offline support. Built 202611181849.
+const CACHE = 'samstronger-202611181849';
+const CORE = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
+self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting())); });
+self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith('samstronger-') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
+self.addEventListener('fetch', e => {
+  const r = e.request; if (r.method !== 'GET') return;
+  const u = new URL(r.url), font = /fonts\.(googleapis|gstatic)\.com$/.test(u.hostname);
+  if (u.origin !== location.origin && !font) return;
+  if (r.mode === 'navigate' || u.pathname.endsWith('/index.html')) { // newest version when online, saved copy when offline
+    e.respondWith(fetch(r).then(res => { const copy = res.clone(); caches.open(CACHE).then(c => c.put('./index.html', copy)); return res; }).catch(() => caches.match('./index.html').then(m => m || caches.match('./'))));
     return;
   }
-  // Map library and fonts: cache first.
-  if (url.hostname === 'unpkg.com' || url.hostname.endsWith('googleapis.com') || url.hostname.endsWith('gstatic.com')) {
-    e.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-      const copy = res.clone();
-      caches.open(CACHE).then((c) => c.put(req, copy));
-      return res;
-    })));
-  }
+  e.respondWith(caches.match(r).then(m => m || fetch(r).then(res => { if (res && (res.ok || res.type === 'opaque')) { const copy = res.clone(); caches.open(CACHE).then(c => c.put(r, copy)); } return res; })));
 });
